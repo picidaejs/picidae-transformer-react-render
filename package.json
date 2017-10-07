@@ -1,0 +1,18 @@
+{
+  "name": "picidae-transformer-react-render",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "babel-core": "^6.21.0",
+    "babel-generator": "~6.11.0",
+    "babel-traverse": "~6.10.4",
+    "babel-types": "~6.11.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
