@@ -30,7 +30,7 @@ module.exports = function (opt, gift, require) {
 
 		$(this).children('code').map(function() {
 			var className = $(this).attr('class');
-			var found = className.split(' ').find(function (x) {
+			var found = className && className.split(' ').find(function (x) {
 				x = x.trim();//.replace(/^language-/, '')
 				return x === 'language-' + (opt.lang || 'react-render')
 			})
@@ -38,7 +38,7 @@ module.exports = function (opt, gift, require) {
 				var code = $(this).text();
 				code = transformer(code);
 				var getComponent = getComponentCreator(code);
-				
+
 				// console.log(getComponent.toString())
 				var reactHTML = ''
 				try {
@@ -51,7 +51,7 @@ module.exports = function (opt, gift, require) {
 					return;
 				}
 
-				var html = '<transformer-react-render data-id="' + (index++) + '">' 
+				var html = '<transformer-react-render data-id="' + (index++) + '">'
 						+ reactHTML
 					 	+ '</transformer-react-render>';
 				preEle.append(html);
