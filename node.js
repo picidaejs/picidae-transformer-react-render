@@ -74,6 +74,6 @@ module.exports = function (opt, gift, require) {
 		})
 	})
 
-	gift.data.content = $.html();
+	gift.data.content = $('body').html();
 	return gift.data;
 }
