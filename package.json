@@ -10,7 +10,8 @@
     "babel-core": "^6.21.0",
     "babel-generator": "~6.11.0",
     "babel-traverse": "~6.10.4",
-    "babel-types": "~6.11.1"
+    "babel-types": "~6.11.1",
+    "detective": "^4.5.0"
   },
   "keywords": [],
   "author": "",

@@ -3,27 +3,21 @@ const utils = require('html-to-react/lib/utils');
 
 module.exports = function (opt) {
 	return function (pageData) {
-		// console.log(pageData.markdown[id]);
-
 		let {markdown, meta} = pageData;
-		// console.log('react-render', opt);
-		// console.log(pageData);
 
 		let content = pageData.markdown.content;
 		let injected = pageData.markdown[id] || {};
-		let codeList = injected.list || [];
-		const {callbackCollect} = this;
+		const {list: codeList = [], pkg} = injected;
+		const set = {
+            'react': React,
+            'react-dom': ReactDOM,
+            ...pkg
+        }
 
-		let {
-			React,
-			ReactDOM
-		} = injected;
-
+        const React = require('react')
+        const ReactDOM = require('react-dom')
 		function fakeRequire(p) {
-			return {
-				'react': React,
-				'react-dom': ReactDOM
-			}[p]
+        	return set[p];
 		};
 
 		return {
