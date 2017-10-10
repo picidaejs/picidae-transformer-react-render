@@ -1,4 +1,5 @@
 var id = 'transformer-react-render'
+const utils = require('html-to-react/lib/utils');
 
 module.exports = function (opt) {
 	return function (pageData) {
@@ -11,51 +12,47 @@ module.exports = function (opt) {
 		let content = pageData.markdown.content;
 		let injected = pageData.markdown[id] || {};
 		let codeList = injected.list || [];
+		const {callbackCollect} = this;
 
 		let {
 			React,
 			ReactDOM
 		} = injected;
 
-		content.replace(
-			/<transformer-react-render data-id="(\d+?)".*?>([^]*?)<\/\s*transformer-react-render>/g,
-			(m, idx) => {
-				var code = codeList[Number(idx)];
-				if (!code) return m;
-				code = code.replace(/^\s+/, '');
-				var getComp = new Function('return ' + code)();
-				// console.log(getComp, meta);
-				function fakeRequire(p) {
-					return {
-						'react': React,
-						'react-dom': ReactDOM
-					}[p]
-				};
+		function fakeRequire(p) {
+			return {
+				'react': React,
+				'react-dom': ReactDOM
+			}[p]
+		};
 
-				var Component = getComp(React, React.Component, ReactDOM, fakeRequire);
+		return {
+			replaceChildren: false,
+			shouldProcessNode: function (node) {
+				return node.name === 'transformer-react-render'
+						&& ('data-id' in node.attribs)
+						&& codeList[Number(node.attribs['data-id'])];
+			},
+			processNode: function (node, children = [], index) {
+				const code = codeList[Number(node.attribs['data-id'])].replace(/^\s+/, '');
 
-				var callbackCollect = this.callbackCollect;
-				// after content rendered
+				const getComponent = new Function('return ' + code)();
+				const Component = getComponent(React, React.Component, ReactDOM, fakeRequire);
 
-				callbackCollect(function (root) {
-					var domList = document.getElementsByTagName(id);
-					domList = Array.from(domList)
-					var dom = domList.find(function(dom) {return dom.getAttribute('data-id') == idx});
-					if (dom) {
-						// clearInterval(t);
-					}
-					if (Component && dom) {
-						ReactDOM.render(
-							React.createElement(Component, null),
-							dom
-						)
-					}
+				node.name = 'div';
+				node.attribs['class'] = 'transformer-react-render';
+				delete node.attribs['data-id'];
 
-				})
-				return m;
+				const component = <Component />;
+                if (!children.length) {
+                    children.push(component)
+				}
+				else {
+                	children[0] = component;
+				}
+
+				return utils.createElement(node, index, node.data, children);
 			}
-		)
-
-		return pageData;
+		}
 	}
 }
