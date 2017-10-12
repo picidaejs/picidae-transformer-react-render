@@ -31,6 +31,7 @@ module.exports = function (opt, gift, require) {
     var ReactDOMServer = require('react-dom/server');
 
     var alias = opt.alias || {};
+    var placement = opt.placement || 'bottom';
     var filesMap = gift.filesMap;
     var path = gift.path;
     var filename = filesMap[path];
@@ -158,7 +159,13 @@ module.exports = function (opt, gift, require) {
                 }
 
                 parser.write(codeHTML);
-                return matched + placeholder;
+                if (placement === 'bottom') {
+                    return '<div class="transformer-react-render-container">' + matched + placeholder + '</div>';
+                }
+                else if (placement === 'top') {
+                    return '<div class="transformer-react-render-container">' + placeholder + matched + '</div>';
+                }
+                return matched;
             }
         );
 
