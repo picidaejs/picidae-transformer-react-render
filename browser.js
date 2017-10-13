@@ -75,6 +75,7 @@ module.exports = function (opt, gift, require) {
                 }
             }
         });
+        console.log(pkgs);
 
         if (containsUnknownPkg) {
             return;
@@ -85,7 +86,7 @@ module.exports = function (opt, gift, require) {
         var getComponent = getComponentCreator(code);
         gift.data[id].list.push(getComponent.toString());
 
-        if (!gift.data[id].pkg) {
+        // if (!gift.data[id].pkg) {
             gift.data[id].pkg = gift.data[id].pkg || {};
             var pkg = gift.data[id].pkg;
 
@@ -103,7 +104,7 @@ module.exports = function (opt, gift, require) {
                     }
                 }
             });
-        }
+        // }
     }
 
     var content = gift.data.content;
