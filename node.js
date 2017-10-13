@@ -28,7 +28,7 @@ module.exports = function (opt, gift, require) {
     var htmlparser = require('htmlparser2');
     var React = require('react')
     var ReactDOM = require('react-dom')
-    var ReactDOMServer = require('react-dom/server');
+    var loaderUtils = require('loader-utils');
 
     var alias = opt.alias || {};
     var placement = opt.placement || 'bottom';
@@ -39,7 +39,7 @@ module.exports = function (opt, gift, require) {
 
     var pkgs = ['react', 'react-dom'];
 
-    function insertCode(code) {
+    function insertCode(code, query) {
         code = transformer(code);
         var pkgsInCode = detective(code);
 
@@ -83,27 +83,25 @@ module.exports = function (opt, gift, require) {
         gift.data[id] = gift.data[id] || {};
         gift.data[id].list = gift.data[id].list || []
         var getComponent = getComponentCreator(code);
-        gift.data[id].list.push(getComponent.toString());
+        gift.data[id].list.push([getComponent.toString(), query]);
 
-        if (!gift.data[id].pkg) {
-            gift.data[id].pkg = gift.data[id].pkg || {};
-            var pkg = gift.data[id].pkg;
+        gift.data[id].pkg = gift.data[id].pkg || {};
+        var pkg = gift.data[id].pkg;
 
-            pkgs.forEach(function (pkgName) {
-                if (typeof pkgName === 'string') {
-                    pkg[pkgName] = {
-                        PICIDAE_EVAL_CODE: true,
-                        value: 'require(\'' + pkgName + '\')'
-                    }
+        pkgs.forEach(function (pkgName) {
+            if (typeof pkgName === 'string') {
+                pkg[pkgName] = {
+                    PICIDAE_EVAL_CODE: true,
+                    value: 'require(\'' + pkgName + '\')'
                 }
-                else {
-                    pkg[pkgName.name] = {
-                        PICIDAE_EVAL_CODE: true,
-                        value: 'require(\'' + pkgName.id + '\')'
-                    }
+            }
+            else {
+                pkg[pkgName.name] = {
+                    PICIDAE_EVAL_CODE: true,
+                    value: 'require(\'' + pkgName.id + '\')'
                 }
-            });
-        }
+            }
+        });
     }
 
     var content = gift.data.content;
@@ -117,9 +115,14 @@ module.exports = function (opt, gift, require) {
                 var className = '';
                 if (name === 'code' && (className = attrs.class)) {
                     var found = className && className.split(' ').find(function (x) {
-                        x = x.trim();
-                        return x === 'language-' + (opt.lang || 'react-render')
-                    });
+                            x = x.trim();
+                            var pos = x.lastIndexOf('?');
+                            if (pos >= 0) {
+                                tmp.query = loaderUtils.parseQuery(x.substring(pos));
+                                x = x.substring(0, pos);
+                            }
+                            return x === 'language-' + (opt.lang || 'react-render')
+                        });
 
                     if (found) {
                         tmp.incode = true;
@@ -135,9 +138,10 @@ module.exports = function (opt, gift, require) {
                 if (name === 'code' && tmp.incode) {
                     tmp.incode = false;
                     if (tmp.code) {
-                        insertCode(tmp.code);
+                        insertCode(tmp.code, tmp.query);
                     }
                     tmp.code = '';
+                    tmp.query= {};
                 }
             },
             onend: function () {
@@ -150,21 +154,26 @@ module.exports = function (opt, gift, require) {
             function (matched, codeHTML, className) {
                 var found = className && className.split(' ').find(function (x) {
                         x = x.trim();
+                        var pos = x.lastIndexOf('?');
+                        if (pos >= 0) {
+                            x = x.substring(0, pos);
+                        }
                         return x === 'language-' + (opt.lang || 'react-render')
                     });
                 var placeholder = '';
                 if (found) {
-                    placeholder = '<transformer-react-render data-id="' + (index++) + '">'
+                    placeholder = '<transformer-react-render' + ' data-id="' + (index++) + '">'
                         + '</transformer-react-render>';
+                    parser.write(codeHTML);
+
+                    if (placement === 'bottom') {
+                        return '<div class="transformer-react-render-container">' + matched + placeholder + '</div>';
+                    }
+                    else if (placement === 'top') {
+                        return '<div class="transformer-react-render-container">' + placeholder + matched + '</div>';
+                    }
                 }
 
-                parser.write(codeHTML);
-                if (placement === 'bottom') {
-                    return '<div class="transformer-react-render-container">' + matched + placeholder + '</div>';
-                }
-                else if (placement === 'top') {
-                    return '<div class="transformer-react-render-container">' + placeholder + matched + '</div>';
-                }
                 return matched;
             }
         );
