@@ -56,21 +56,21 @@ module.exports = function (opt, gift, require) {
             var tmp = codePkg.trim();
             if (tmp.startsWith('.')) {
                 tmp = nps.join(dirname, tmp);
-                if (notExists()) return true;
+                if (notExists()) return //true;
                 pkgs.push({name: codePkg, id: require.resolve(tmp)});
             }
             else if (tmp.startsWith('/')) {
-                if (notExists()) return true;
+                if (notExists()) return //true;
                 pkgs.push({name: codePkg, id: tmp});
             } else {
                 var chunks = tmp.split('/')
                 if (alias[chunks[0]]) {
                     tmp = nps.join(alias[chunks[0]], chunks.slice(1).join('/'));
-                    if (notExists()) return true;
+                    if (notExists()) return //true;
                     pkgs.push(codePkg);
                 }
                 else {
-                    if (notExists()) return true;
+                    if (notExists()) return //true;
                     pkgs.push(codePkg);
                 }
             }

@@ -1,6 +1,13 @@
 var id = 'transformer-react-render'
 const utils = require('html-to-react/lib/utils');
 
+const errorBox = {
+    display: 'block',
+    padding: '0.5rem',
+    background: '#ff5555',
+    color: '#f8f8f2'
+}
+
 module.exports = function (opt) {
     return function (pageData) {
         // console.log(pageData.markdown[id]);
@@ -16,13 +23,18 @@ module.exports = function (opt) {
         let codeList = injected.list || [];
         let pkg = injected.pkg || {};
 
-        function fakeRequire(p) {
-            return {
-                ...pkg,
-                'react': React,
-                'react-dom': ReactDOM,
-            }[p]
+        pkg = {
+            ...pkg,
+            'react': React,
+            'react-dom': ReactDOM,
         };
+
+        function fakeRequire(p) {
+            if (!(p in pkg)) {
+                throw new Error(` React-Render: Module \`${p}\` is Not Found`);
+            }
+            return pkg[p];
+        }
 
         return [
             {
@@ -58,9 +70,13 @@ module.exports = function (opt) {
                 processNode: function (node, children = [], index) {
                     var ent = codeList[Number(node.attribs['data-id'])];
                     const code = ent[0].replace(/^\s+/, '');
-
-                    const getComponent = new Function('return ' + code)();
-                    const Component = getComponent(React, React.Component, ReactDOM, fakeRequire);
+                    let Component = null;
+                    try {
+                        const getComponent = new Function('return ' + code)();
+                        Component = getComponent(React, React.Component, ReactDOM, fakeRequire);
+                    } catch (ex) {
+                        return <pre style={errorBox}>{ex.stack}</pre>;
+                    }
 
                     node.name = 'div';
                     node.attribs['class'] = 'transformer-react-render';
@@ -73,8 +89,11 @@ module.exports = function (opt) {
                     else {
                         children[0] = component;
                     }
-
-                    return utils.createElement(node, index, node.data, children);
+                    try {
+                        return utils.createElement(node, index, node.data, children);
+                    } catch (ex) {
+                        return <pre style={errorBox}>{ex.stack}</pre>;
+                    }
                 }
             }
         ]
