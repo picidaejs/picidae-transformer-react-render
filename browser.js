@@ -52,7 +52,6 @@ module.exports = function (opt) {
                     }
 
                     var ent = codeList[Number(placeholder.attribs['data-id'])];
-                    const code = ent[0].replace(/^\s+/, '');
                     var query = ent[1] || {};
                     if (query.hide) {
                         return null;
@@ -75,7 +74,7 @@ module.exports = function (opt) {
                         const getComponent = new Function('return ' + code)();
                         Component = getComponent(React, React.Component, ReactDOM, fakeRequire);
                     } catch (ex) {
-                        return <pre style={errorBox}>{ex.stack}</pre>;
+                        Component = () => <div style={errorBox}>{ex.message}</div>;
                     }
 
                     node.name = 'div';
@@ -89,11 +88,8 @@ module.exports = function (opt) {
                     else {
                         children[0] = component;
                     }
-                    try {
-                        return utils.createElement(node, index, node.data, children);
-                    } catch (ex) {
-                        return <pre style={errorBox}>{ex.stack}</pre>;
-                    }
+                    
+                    return utils.createElement(node, index, node.data, children);
                 }
             }
         ]
