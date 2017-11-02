@@ -1,100 +1,73 @@
 'use strict';
 
-const babel = require('babel-core');
-const types = require('babel-types');
-const traverse = require('babel-traverse').default;
-const generator = require('babel-generator').default;
-
-const errorBoxStyle = {
-  padding: 10,
-  background: 'rgb(204, 0, 0)',
-  color: 'white',
-  fontFamily: 'sans-serif',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  overflow: 'auto',
-};
+var babel = require('babel-core');
+var types = require('babel-types');
+var traverse = require('babel-traverse').default;
+var generator = require('babel-generator').default;
+var errFunc = require('./lib/error-func')
 
 function requireGenerator(varName, moduleName) {
-  return types.variableDeclaration('var', [
-    types.variableDeclarator(
-      types.identifier(varName),
-      types.callExpression(
-        types.identifier('require'),
-        [types.stringLiteral(moduleName)]
-      )
-    ),
-  ]);
+    return types.variableDeclaration('var', [
+        types.variableDeclarator(
+            types.identifier(varName),
+            types.callExpression(
+                types.identifier('require'),
+                [types.stringLiteral(moduleName)]
+            )
+        ),
+    ]);
 }
 
-const defaultBabelConfig = {
-  presets: ['es2015', 'react', 'stage-0'],
-  plugins: [
-	"transform-decorators-legacy",
-    // [
-    //   "transform-runtime", {
-    //     "polyfill": false,
-    //     "regenerator": true
-    //   }
-    // ]
-]
-};
+var defaultBabelConfig = require('./lib/babel-config');
 
-module.exports = function transformer(
-  code,
-  babelConfig = {},
-  noreact
-) {
-  let codeAst = null;
-  try {
-    const { ast } = babel.transform(code, Object.assign({}, defaultBabelConfig, babelConfig));
-    codeAst = ast;
-  } catch(e) {
-    console.error(e);
-    return `function() { ` +
-      `  var React = require('react');` +
-      `  return React.createElement('pre', {` +
-      `    style: ${JSON.stringify(errorBoxStyle)}` +
-      `  }, '${e.toString()}'); ` +
-      `}`;
-  }
+module.exports = function transformer(code,
+                                      babelConfig = {},
+                                      noreact) {
+    var codeAst = null;
+    try {
+        var ast = babel.transform(code, Object.assign({}, defaultBabelConfig, babelConfig)).ast;
+        codeAst = ast;
+    } catch (e) {
+        console.error(e);
+        return errFunc(e.toString());
+    }
 
-  let renderReturn = null;
-  traverse(codeAst, {
-    CallExpression: function(callPath) {
-      const callPathNode = callPath.node;
-      if (callPathNode.callee &&
-          callPathNode.callee.object &&
-          callPathNode.callee.object.name === 'ReactDOM' &&
-          callPathNode.callee.property &&
-          callPathNode.callee.property.name === 'render') {
+    var renderReturn = null;
+    traverse(codeAst, {
+        CallExpression: function (callPath) {
+            var callPathNode = callPath.node;
+            if (callPathNode.callee &&
+                callPathNode.callee.object &&
+                callPathNode.callee.object.name === 'ReactDOM' &&
+                callPathNode.callee.property &&
+                callPathNode.callee.property.name === 'render') {
 
-        renderReturn = types.returnStatement(
-          callPathNode.arguments[0]
-        );
+                renderReturn = types.returnStatement(
+                    callPathNode.arguments[0]
+                );
 
-        callPath.remove();
-      }
-    },
-  });
+                callPath.remove();
+            }
+        },
+    });
 
-  const astProgramBody = codeAst.program.body;
-  // if (!noreact) {
+    var astProgramBody = codeAst.program.body;
+    // if (!noreact) {
     // astProgramBody.unshift(requireGenerator('ReactDOM', 'react-dom'));
     // astProgramBody.unshift(requireGenerator('React', 'react'));
-  // }
-  // ReactDOM.render always at the last of preview method
-  if (renderReturn) {
-    astProgramBody.push(renderReturn);
-  }
+    // }
+    // ReactDOM.render always at the last of preview method
+    if (renderReturn) {
+        astProgramBody.push(renderReturn);
+    }
 
-  const codeBlock = types.BlockStatement(astProgramBody);
-  // console.log(codeBlock);
-  const previewFunction = types.functionDeclaration(
-    types.Identifier('picidaeTransformerReactRender'),
-    [],
-    codeBlock
-  );
+    var codeBlock = types.BlockStatement(astProgramBody);
+    // console.log(codeBlock);
+    var previewFunction = types.functionDeclaration(
+        types.Identifier('picidaeTransformerReactRender'),
+        [],
+        codeBlock
+    );
 
-  return generator(types.program([previewFunction]), null, code).code;
+    return generator(types.program([previewFunction]), null, code).code;
 };

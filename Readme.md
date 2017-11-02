@@ -21,6 +21,7 @@ export default () => <h1>Hello React Render</h1>
 
 ## Option
 
-- lang: string (default: `'react-render'`)
+- lang: string (default: `'react-render'`)  
+- editable: boolean (default: `false`)
 - placement: string: `'bottom' | 'top'`  
   the placement of react component view. (default: `'bottom'`)

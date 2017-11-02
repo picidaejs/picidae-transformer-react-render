@@ -2,7 +2,7 @@
 var fs = require('fs');
 var nps = require('path');
 var transformer = require('./transformer');
-var getComponentCreator = require('./getComponentCreator');
+var getComponentCreator = require('./lib/getComponentCreator');
 var babelCore = require('babel-core')
 var detective = require('detective')
 
