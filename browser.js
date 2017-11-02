@@ -89,7 +89,7 @@ module.exports = function (opt) {
                             const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
                             if (placeholderEle) {
                                 const ele = evt.target;
-                                const es6Code = ele.textContent;
+                                const es6Code = ele.innerText;
 
                                 injectBabel()
                                     .then(() => {
