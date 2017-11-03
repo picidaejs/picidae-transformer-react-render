@@ -85,8 +85,24 @@ module.exports = function (opt) {
                     }
                     if (query.editable) {
                         node.attribs['contenteditable'] = true;
+                        // node.attribs['spellcheck'] = 'false';
+                        node.attribs['onInput'] = evt => {
+                            const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
+                            // @todo editor
+                            if (placeholderEle) {
+                                // const ele = evt.target;
+                                // const hlg = require('highlight.js');
+                                // const ret = hlg.highlight('jsx', ele.innerText, true);
+                                // const code = ele.querySelector('code');
+                                // if (code) {
+                                //     code.innerHTML = ret.value;
+                                // }
+                            }
+                        }
+
                         node.attribs['onBlur'] = evt => {
                             const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
+
                             if (placeholderEle) {
                                 const ele = evt.target;
                                 const es6Code = ele.innerText;
@@ -151,7 +167,7 @@ module.exports = function (opt) {
                     else {
                         children[0] = component;
                     }
-                    
+
                     return utils.createElement(node, index, node.data, children);
                 }
             }

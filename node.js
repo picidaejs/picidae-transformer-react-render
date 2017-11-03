@@ -1,5 +1,4 @@
 // var cheerio = require('cheerio');
-var fs = require('fs');
 var nps = require('path');
 var transformer = require('./transformer');
 var getComponentCreator = require('./lib/getComponentCreator');
@@ -22,14 +21,14 @@ function htmlDecode(str) {
     return str;
 }
 
-
-module.exports = function (opt, gift, require) {
+// exports.remarkTransformer = require('./remark-transformer');
+exports.htmlTransformer = function (opt, gift, require) {
 
     var htmlparser = require('htmlparser2');
     var React = require('react')
     var ReactDOM = require('react-dom')
     var loaderUtils = require('loader-utils');
-
+//
     var alias = opt.alias || {};
     var placement = opt.placement || 'bottom';
     var filesMap = gift.filesMap;
@@ -112,19 +111,25 @@ module.exports = function (opt, gift, require) {
             opts = {decodeEntities: false};
         var parser = new htmlparser.Parser({
             onopentag: function(name, attrs) {
-                var className = '';
-                if (name === 'code' && (className = attrs.class)) {
+                var className = '', query;
+                if (name === 'code'
+                    && (
+                        className = attrs.class,
+                        query = htmlDecode(attrs['data-query'] || '{}')
+                    )
+                ) {
+                    tmp.query = JSON.parse(query);
                     var found = className && className.split(' ').find(function (x) {
                             x = x.trim();
                             var pos = x.lastIndexOf('?');
                             if (pos >= 0) {
-                                tmp.query = loaderUtils.parseQuery(x.substring(pos));
                                 x = x.substring(0, pos);
                             }
                             return x === 'language-' + (opt.lang || 'react-render')
                         });
 
                     if (found) {
+
                         tmp.incode = true;
                     }
                 }
@@ -150,7 +155,7 @@ module.exports = function (opt, gift, require) {
         }, opts);
 
         gift.data.content = content.replace(
-            /<pre.*?>[^]*?(<code\s+class="(.+?)">[^]+?<\/code>)[^]*?<\/pre>/g,
+            /<pre.*?>[^]*?(<code.+?class="(.+?)".+?>[^]+?<\/code>)[^]*?<\/pre>/g,
             function (matched, codeHTML, className) {
                 var found = className && className.split(' ').find(function (x) {
                         x = x.trim();
