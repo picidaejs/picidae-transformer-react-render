@@ -2,6 +2,19 @@ const id = 'transformer-react-render'
 const utils = require('html-to-react/lib/utils');
 const errorFunc = require('./lib/error-func');
 const getComponentCreator = require('./lib/getComponentCreator');
+import Editor from 'react-code-editor';
+
+function toString(node) {
+  if (node.type === 'text') {
+      return node.data;
+  }
+
+  if (node.type === 'tag') {
+      return node.children.reduce((s, a) =>
+          s + toString(a)
+      , '');
+  }
+}
 
 function injectScript(data = {}, autoAppend = true) {
     const {src, type = 'text/javascript', ...props} = data;
@@ -84,23 +97,8 @@ module.exports = function (opt) {
                         return null;
                     }
                     if (query.editable) {
-                        node.attribs['contenteditable'] = true;
-                        // node.attribs['spellcheck'] = 'false';
-                        node.attribs['onInput'] = evt => {
-                            const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
-                            // @todo editor
-                            if (placeholderEle) {
-                                // const ele = evt.target;
-                                // const hlg = require('highlight.js');
-                                // const ret = hlg.highlight('jsx', ele.innerText, true);
-                                // const code = ele.querySelector('code');
-                                // if (code) {
-                                //     code.innerHTML = ret.value;
-                                // }
-                            }
-                        }
-
-                        node.attribs['onBlur'] = evt => {
+                        const code = toString(node);
+                        const onBlur = evt => {
                             const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
 
                             if (placeholderEle) {
@@ -134,6 +132,27 @@ module.exports = function (opt) {
                             }
 
                         };
+                        const onKeyDown = evt => {
+                            if (
+                                // Cmd/Ctrl + S
+                                evt.ctrlKey !== evt.metaKey
+                                && evt.keyCode === 83
+                            ) {
+                                evt.preventDefault();
+                                onBlur(evt);
+                            }
+                        }
+
+                        return <Editor
+                            onKeyDown={onKeyDown}
+                            onBlur={onBlur}
+                            tabSize={4}
+                            spellCheck="true"
+                            language="jsx"
+                            mountStyle={false}
+                            code={code}
+                            className="language-jsx"
+                        />;
                     }
 
                     return utils.createElement(node, index, node.data, children);
