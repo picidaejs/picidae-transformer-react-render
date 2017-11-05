@@ -1,4 +1,6 @@
 const id = 'transformer-react-render'
+let ReactDOM = require('react-dom')
+let React = require('react')
 const utils = require('html-to-react/lib/utils');
 const errorFunc = require('./lib/error-func');
 const getComponentCreator = require('./lib/getComponentCreator');
@@ -14,6 +16,13 @@ function toString(node) {
           s + toString(a)
       , '');
   }
+}
+
+function getComponetMultiWay(Comp) {
+    if (React.isValidElement(Comp)) return Comp
+    if (typeof Comp !== 'function') return null
+
+    return <Comp />
 }
 
 function injectScript(data = {}, autoAppend = true) {
@@ -48,9 +57,6 @@ module.exports = function (opt) {
 
     return function (pageData) {
         let {markdown, meta} = pageData;
-
-        let ReactDOM = require('react-dom')
-        let React = require('react')
 
         let content = pageData.markdown.content;
         let injected = pageData.markdown[id] || {};
@@ -122,12 +128,13 @@ module.exports = function (opt) {
                                             console.error(e);
                                             Component = errorFunc.render(e.toString());
                                         }
-
-                                        Component = React.isValidElement(Component) ? Component : <Component/>;
-                                        ReactDOM.render(
+                                        Component = getComponetMultiWay(Component);
+                                        Component ? ReactDOM.render(
                                             Component,
                                             placeholderEle
-                                        );
+                                        ) : (
+                                            ReactDOM.unmountComponentAtNode(placeholderEle)
+                                        )
                                     });
                             }
 
@@ -179,7 +186,7 @@ module.exports = function (opt) {
                     node.name = 'div';
                     node.attribs['class'] = 'transformer-react-render';
 
-                    const component = React.isValidElement(Component) ? Component : <Component/>;
+                    const component = getComponetMultiWay(Component);
                     if (!children.length) {
                         children.push(component)
                     }

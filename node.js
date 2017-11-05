@@ -62,11 +62,22 @@ exports.htmlTransformer = function (opt, gift, require) {
                 if (notExists()) return //true;
                 pkgs.push({name: codePkg, id: tmp});
             } else {
-                var chunks = tmp.split('/')
-                if (alias[chunks[0]]) {
-                    tmp = nps.join(alias[chunks[0]], chunks.slice(1).join('/'));
+                var keys = Object.keys(alias);
+                var matchedAlias = keys.find(function (key) {
+                    if (tmp === key.trim() || tmp.startsWith(key.trim().replace(/\/*$/, '/'))) {
+                        return true;
+                    }
+                });
+                if (matchedAlias) {
+                    tmp = nps.resolve(
+                        alias[matchedAlias],
+                        tmp.replace(
+                            new RegExp('^' + matchedAlias.replace(/\/*$/, '/?')),
+                            ''
+                        )
+                    );
                     if (notExists()) return //true;
-                    pkgs.push(codePkg);
+                    pkgs.push({name: codePkg, id: tmp});
                 }
                 else {
                     if (notExists()) return //true;
@@ -115,7 +126,7 @@ exports.htmlTransformer = function (opt, gift, require) {
                 if (name === 'code'
                     && (
                         className = attrs.class,
-                        query = htmlDecode(attrs['data-query'] || '{}')
+                            query = htmlDecode(attrs['data-query'] || '{}')
                     )
                 ) {
                     tmp.query = JSON.parse(query);
