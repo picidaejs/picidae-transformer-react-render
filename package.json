@@ -12,7 +12,7 @@
     "babel-traverse": "~6.10.4",
     "babel-types": "~6.11.1",
     "detective": "^4.5.0",
-    "react-code-editor": "^0.0.6"
+    "react-code-editor": "^0.0.7"
   },
   "keywords": [],
   "author": "",
