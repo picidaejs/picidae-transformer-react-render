@@ -53,7 +53,7 @@ async function injectBabel() {
 const errorBox = require('./lib/error-style')
 
 module.exports = function (opt) {
-
+    const editorProps = opt.editorProps;
 
     return function (pageData) {
         let {markdown, meta} = pageData;
@@ -151,14 +151,15 @@ module.exports = function (opt) {
                         }
 
                         return <Editor
-                            onKeyDown={onKeyDown}
-                            onBlur={onBlur}
                             tabSize={4}
                             spellCheck="true"
                             language="jsx"
                             mountStyle={false}
                             code={code}
                             className="language-jsx"
+                            {...editorProps}
+                            onKeyDown={onKeyDown}
+                            onBlur={onBlur}
                         />;
                     }
 

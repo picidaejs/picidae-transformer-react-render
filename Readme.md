@@ -23,5 +23,6 @@ export default () => <h1>Hello React Render</h1>
 
 - lang: string (default: `'react-render'`)  
 - editable: boolean (default: `false`)
+- editorProps: Object | null (react-code-editor's props)
 - placement: string: `'bottom' | 'top'`  
   the placement of react component view. (default: `'bottom'`)
