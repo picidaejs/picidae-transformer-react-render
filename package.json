@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "babel-core": "^6.26.0",
-    "babel-generator": "^6.11.4",
+    "babel-generator": "^6.26.0",
     "babel-traverse": "^6.26.0",
     "babel-types": "^6.11.1",
     "detective": "^4.5.0",
