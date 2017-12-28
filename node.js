@@ -39,7 +39,7 @@ exports.htmlTransformer = function (opt, gift, require) {
     var pkgs = ['react', 'react-dom'];
 
     function insertCode(code, query) {
-        code = transformer(code);
+        code = transformer(code, filename);
         var pkgsInCode = detective(code);
 
         var containsUnknownPkg = pkgsInCode.some(function (codePkg) {
