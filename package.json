@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "babel-generator": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "detective": "^4.5.0",
     "react-code-editor": "^0.0.14"
   },

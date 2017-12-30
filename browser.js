@@ -119,7 +119,7 @@ module.exports = function (opt) {
                                         let Component = null;
                                         try {
                                             code = babel.transform(es6Code, {
-                                                ...require('./lib/babel-config'),
+                                                ...require('./lib/babel-standlone-config'),
                                                 ast: false
                                             }).code;
                                             code = new Function(code).toString();
