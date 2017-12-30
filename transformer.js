@@ -1,8 +1,8 @@
 'use strict'
 
-var babel = require('babel-core')
-var types = require('babel-types')
-var traverse = require('babel-traverse').default
+var babel = require('picidae/exports/babel-core')
+var types = babel.types
+var traverse = babel.traverse
 var generator = require('babel-generator').default
 var errFunc = require('./lib/error-func')
 

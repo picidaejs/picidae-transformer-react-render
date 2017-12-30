@@ -2,7 +2,7 @@
 var nps = require('path');
 var transformer = require('./transformer');
 var getComponentCreator = require('./lib/getComponentCreator');
-var babelCore = require('babel-core')
+var babelCore = require('picidae/exports/babel-core')
 var detective = require('detective')
 
 
