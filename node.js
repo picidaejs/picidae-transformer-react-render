@@ -1,7 +1,8 @@
 // var cheerio = require('cheerio');
 var nps = require('path');
 var transformer = require('./transformer');
-var getComponentCreator = require('./lib/getComponentCreator');
+var getComponentCreator = require('./lib/getComponentCreator')
+var getLastImportLineNum = require('./lib/getLastImportLine')
 var babelCore = require('picidae/exports/babel-core')
 var detective = require('detective')
 
@@ -39,6 +40,7 @@ exports.htmlTransformer = function (opt, gift, require) {
     var pkgs = ['react', 'react-dom'];
 
     function insertCode(code, query) {
+        var es6Code = code
         code = transformer(code, filename);
         var pkgsInCode = detective(code);
 
@@ -93,7 +95,7 @@ exports.htmlTransformer = function (opt, gift, require) {
         gift.data[id] = gift.data[id] || {};
         gift.data[id].list = gift.data[id].list || []
         var getComponent = getComponentCreator(code);
-        gift.data[id].list.push([getComponent.toString(), query]);
+        gift.data[id].list.push([getComponent.toString(), query, getLastImportLineNum(es6Code)]);
 
         gift.data[id].pkg = gift.data[id].pkg || {};
         var pkg = gift.data[id].pkg;
