@@ -11,7 +11,7 @@
     "babel-traverse": "^6.26.0",
     "babylon": "^6.18.0",
     "detective": "^4.5.0",
-    "react-code-editor": "^0.0.14"
+    "react-code-editor": "0.0.17"
   },
   "keywords": [],
   "author": "",

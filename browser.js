@@ -49,7 +49,7 @@ async function injectBabel(cdn = 'https://unpkg.com/babel-standalone@6.26.0/babe
 }
 
 // const transformer = require('./transformer');
-
+import './style.less'
 const errorBox = require('./lib/error-style')
 
 module.exports = function (opt) {
@@ -99,12 +99,20 @@ module.exports = function (opt) {
 
                     var ent = codeList[Number(dataId)];
                     var query = ent[1] || {};
+                    var lineNumber = ent[2];
                     query = Object.assign({}, opt, query);
                     if (query.hide) {
                         return null;
                     }
+
                     if (query.editable) {
-                        const code = toString(node);
+                        let code = toString(node);
+                        let lines = code.split('\n'), prefixCode = ''
+                        if (lineNumber && lineNumber != '-1') {
+                            prefixCode = lines.slice(0, lineNumber + 1).join('\n')
+                            code = lines.slice(lineNumber + 1).join('\n')
+                        }                     
+
                         const onBlur = async evt => {
                             const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
 
@@ -112,7 +120,7 @@ module.exports = function (opt) {
                                 const ele = evt.target;
                                 // @todo maybe more information after
                                 const holder = {
-                                  es6Code: ele.innerText
+                                  es6Code: prefixCode + '\n' + ele.innerText
                                 }
                                 // picidae V2.1.16
                                 if (global.__picidae__emitter) {
@@ -156,18 +164,23 @@ module.exports = function (opt) {
                                 await onBlur(evt);
                             }
                         }
+                        
+                        // console.log(prefixCode)
 
-                        return <Editor
-                            tabSize={4}
-                            spellCheck="true"
-                            language="jsx"
-                            mountStyle={false}
-                            code={code}
-                            className="language-jsx"
-                            {...editorProps}
-                            onKeyDown={onKeyDown}
-                            onBlur={onBlur}
-                        />;
+                        return (
+                            <Editor
+                                tabSize={4}
+                                spellCheck="true"
+                                language="jsx"
+                                className="language-jsx"
+                                mountStyle={false}
+                                {...editorProps}
+                                code={code}
+                                prefixCode={prefixCode}
+                                onKeyDown={onKeyDown}
+                                onBlur={onBlur}
+                            />
+                        )
                     }
 
                     return utils.createElement(node, index, node.data, children);
