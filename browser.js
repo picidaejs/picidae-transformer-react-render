@@ -34,11 +34,11 @@ function injectScript(data = {}, autoAppend = true) {
 }
 
 injectBabel.injected = false;
-async function injectBabel() {
+async function injectBabel(cdn = 'https://unpkg.com/babel-standalone@6.26.0/babel.min.js') {
     if (injectBabel.injected) {
         return;
     }
-    const babelCDN = 'https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js'
+    const babelCDN = cdn
     const script = injectScript({async: true, src: babelCDN});
     injectBabel.injected = true;
     return new Promise(resolve => {
@@ -54,6 +54,7 @@ const errorBox = require('./lib/error-style')
 
 module.exports = function (opt) {
     const editorProps = opt.editorProps;
+    const babelStandaloneCDN = opt.babelStandaloneCDN;
 
     return function (pageData) {
         let {markdown, meta} = pageData;
@@ -117,7 +118,7 @@ module.exports = function (opt) {
                                 if (global.__picidae__emitter) {
                                     await global.__picidae__emitter.emit('react-render.holder', holder)
                                 }
-                                injectBabel()
+                                injectBabel(babelStandaloneCDN)
                                     .then(() => {
                                         const babel = window.Babel;
 
