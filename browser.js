@@ -104,13 +104,19 @@ module.exports = function (opt) {
                     }
                     if (query.editable) {
                         const code = toString(node);
-                        const onBlur = evt => {
+                        const onBlur = async evt => {
                             const placeholderEle = document.querySelector(`.transformer-react-render[data-id="${dataId}"]`);
 
                             if (placeholderEle) {
                                 const ele = evt.target;
-                                const es6Code = ele.innerText;
-
+                                // @todo maybe more information after
+                                const holder = {
+                                  es6Code: ele.innerText
+                                }
+                                // picidae V2.1.16
+                                if (global.__picidae__emitter) {
+                                    await global.__picidae__emitter.emit('react-render.holder', holder)
+                                }
                                 injectBabel()
                                     .then(() => {
                                         const babel = window.Babel;
@@ -118,7 +124,7 @@ module.exports = function (opt) {
                                         let code = null;
                                         let Component = null;
                                         try {
-                                            code = babel.transform(es6Code, {
+                                            code = babel.transform(holder.es6Code, {
                                                 ...require('./lib/babel-standlone-config'),
                                                 ast: false
                                             }).code;
@@ -139,14 +145,14 @@ module.exports = function (opt) {
                             }
 
                         };
-                        const onKeyDown = evt => {
+                        const onKeyDown = async evt => {
                             if (
                                 // Cmd/Ctrl + S
                                 evt.ctrlKey !== evt.metaKey
                                 && evt.keyCode === 83
                             ) {
                                 evt.preventDefault();
-                                onBlur(evt);
+                                await onBlur(evt);
                             }
                         }
 
