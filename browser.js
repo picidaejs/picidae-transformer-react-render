@@ -109,8 +109,8 @@ module.exports = function (opt) {
                         let code = toString(node);
                         let lines = code.split('\n'), prefixCode = ''
                         if (lineNumber && lineNumber != '-1') {
-                            prefixCode = lines.slice(0, lineNumber + 1).join('\n')
-                            code = lines.slice(lineNumber + 1).join('\n')
+                            prefixCode = lines.slice(0, lineNumber).join('\n')
+                            code = lines.slice(lineNumber).join('\n')
                         }                     
 
                         const onBlur = async evt => {
