@@ -157,7 +157,7 @@ exports.htmlTransformer = function (opt, gift, require) {
                         insertCode(tmp.code, tmp.query);
                     }
                     tmp.code = '';
-                    tmp.query= {};
+                    // tmp.query= {};
                 }
             },
             onend: function () {
@@ -181,11 +181,11 @@ exports.htmlTransformer = function (opt, gift, require) {
                     placeholder = '<transformer-react-render' + ' data-id="' + (index++) + '">'
                         + '</transformer-react-render>';
                     parser.write(codeHTML);
-
-                    if (placement === 'bottom') {
+                    var place = tmp.query && tmp.query.placement || placement
+                    if (place === 'bottom') {
                         return '<div class="transformer-react-render-container">' + matched + placeholder + '</div>';
                     }
-                    else if (placement === 'top') {
+                    else if (place === 'top') {
                         return '<div class="transformer-react-render-container">' + placeholder + matched + '</div>';
                     }
                 }
