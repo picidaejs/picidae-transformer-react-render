@@ -5,7 +5,7 @@ var getComponentCreator = require('./lib/getComponentCreator')
 var getLastImportLineNum = require('./lib/getLastImportLine')
 var babelCore = require('picidae/exports/babel-core')
 var detective = require('detective')
-
+var unescape = require('unescape')
 
 var id = 'transformer-react-render';
 
